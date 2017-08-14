@@ -1,0 +1,37 @@
+# -*- coding: utf-8 -*-
+# 查找IP地址归属地
+
+import urllib
+import json
+import re
+
+url = "http://ip.taobao.com/service/getIpInfo.php?ip="
+
+# 查找IP地址
+def ip_location(ip):
+    data = urllib.urlopen(url + ip).read()
+    datadict = json.loads(data)
+    # print datadict
+
+    for oneinfo in datadict:
+        if "code" == oneinfo:
+            if datadict[oneinfo] == 0:
+                return datadict["data"]["country"] + datadict["data"]["region"] + datadict["data"]["city"] + datadict["data"]["isp"]
+
+
+# 定义IP与域名正则
+re_ipaddress = re.compile(r'((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)')
+re_domain = re.compile(r'[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?')
+
+# 如果参数是文件,迭代查找
+file_path = './IPlists.txt'
+fh = open(file_path, 'r')
+# print fh.readlines()
+for line in fh.readlines():
+    # print line
+    if re.match(re_ipaddress,line.strip()):
+        m=re.match(re_ipaddress,line.strip())
+        # print m.group()
+        city_address = ip_location(m.group())
+        print m.group().strip()+ ":" + city_address
+fh.close()
